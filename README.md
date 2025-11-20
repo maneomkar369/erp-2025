@@ -33,7 +33,11 @@
 
 5. **Create admin user**
    ```bash
-   python create_admin.py
+   # Option 1: Using Django shell
+   python manage.py shell -c "from academic.models import User; User.objects.create_user(username='admin', email='admin@example.com', password='admin123', role='Admin', first_name='System', last_name='Administrator')"
+
+   # Option 2: Follow detailed guide
+   # See ADMIN_GUIDE.md for comprehensive admin setup instructions
    ```
 
 6. **Run the development server**
@@ -49,6 +53,12 @@
 ### Features Overview
 - **Teacher Portal**: Manage courses, students, grades, and attendance
 - **Student Portal**: View results, attendance, and course materials
+- **Admin Portal**: Full system administration and user management
+
+### 📚 Documentation
+- **[Admin Guide](ADMIN_GUIDE.md)**: Comprehensive guide for creating and managing admin credentials
+- **API Documentation**: REST API endpoints (coming soon)
+- **Deployment Guide**: Production deployment instructions (coming soon)
 - **Admin Portal**: Full system administration and user management
 
 ---
