@@ -1,0 +1,279 @@
+{% extends 'academic/base.html' %}
+{% block title %}My Profile{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'student_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Profile</li>
+                </ol>
+            </nav>
+            <h1 class="display-6 fw-bold text-white mb-3">My Profile</h1>
+        </div>
+    </div>
+
+    <!-- Profile Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-user-graduate fa-4x text-primary"></i>
+                    </div>
+                    <h2 class="card-title">{{ student.user.get_full_name|default:student.user.username }}</h2>
+                    <p class="text-muted mb-2">Student</p>
+                    <span class="badge bg-primary fs-6">Roll No: {{ student.roll_no }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Information -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>Profile Information</h4>
+                    <button class="btn btn-light btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#editProfile" aria-expanded="false" aria-controls="editProfile">
+                        <i class="fas fa-edit me-1"></i>Edit Profile
+                    </button>
+                </div>
+                <div class="card-body">
+                    <!-- View Mode -->
+                    <div id="viewProfile">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Full Name</label>
+                                    <p class="form-control-plaintext">{{ student.user.get_full_name|default:"Not provided" }}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Username</label>
+                                    <p class="form-control-plaintext">{{ student.user.username }}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Email</label>
+                                    <p class="form-control-plaintext">{{ student.user.email|default:"Not provided" }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Roll Number</label>
+                                    <p class="form-control-plaintext">{{ student.roll_no }}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Class</label>
+                                    <p class="form-control-plaintext">{{ student.class_name }}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Date of Birth</label>
+                                    <p class="form-control-plaintext">{{ student.date_of_birth|date:"M d, Y"|default:"Not specified" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit Mode -->
+                    <div class="collapse" id="editProfile">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="first_name" class="form-label fw-bold">First Name</label>
+                                        <input type="text" class="form-control" id="first_name" name="first_name" value="{{ student.user.first_name }}" maxlength="30">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="last_name" class="form-label fw-bold">Last Name</label>
+                                        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ student.user.last_name }}" maxlength="30">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label fw-bold">Email</label>
+                                        <input type="email" class="form-control" id="email" name="email" value="{{ student.user.email }}" maxlength="254">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Roll Number</label>
+                                        <input type="text" class="form-control" value="{{ student.roll_no }}" readonly>
+                                        <small class="text-muted">Roll number cannot be changed</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Class</label>
+                                        <input type="text" class="form-control" value="{{ student.class_name }}" readonly>
+                                        <small class="text-muted">Class cannot be changed</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="date_of_birth" class="form-label fw-bold">Date of Birth</label>
+                                        <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ student.date_of_birth|date:'Y-m-d' }}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save me-1"></i>Save Changes
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#editProfile">
+                                    <i class="fas fa-times me-1"></i>Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Academic Statistics</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="p-2">
+                                <h3 class="text-primary">{{ att_perc|floatformat:0 }}%</h3>
+                                <p class="text-muted mb-0 small">Attendance</p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="p-2">
+                                <h3 class="text-success">{{ avg_marks|floatformat:1 }}</h3>
+                                <p class="text-muted mb-0 small">Avg Marks</p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="p-2">
+                                <h3 class="text-info">{{ total_results }}</h3>
+                                <p class="text-muted mb-0 small">Results</p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="p-2">
+                                <h3 class="text-warning">{{ total_submissions }}</h3>
+                                <p class="text-muted mb-0 small">Submissions</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Academic Performance -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>Academic Performance</h4>
+                </div>
+                <div class="card-body">
+                    {% if results %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Course</th>
+                                        <th>Exam Type</th>
+                                        <th>Marks</th>
+                                        <th>Date</th>
+                                        <th>Grade</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for result in results %}
+                                    <tr>
+                                        <td>{{ result.course.name }}</td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ result.exam_type }}</span>
+                                        </td>
+                                        <td>
+                                            <strong>{{ result.marks }}</strong>
+                                        </td>
+                                        <td>{{ result.date|date:"M d, Y" }}</td>
+                                        <td>
+                                            {% if result.marks >= 90 %}
+                                                <span class="badge bg-success">A</span>
+                                            {% elif result.marks >= 80 %}
+                                                <span class="badge bg-primary">B</span>
+                                            {% elif result.marks >= 70 %}
+                                                <span class="badge bg-info">C</span>
+                                            {% elif result.marks >= 60 %}
+                                                <span class="badge bg-warning">D</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">F</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No results available</h5>
+                            <p class="text-muted">Your academic results will appear here once exams are conducted.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h4 class="mb-0"><i class="fas fa-history me-2"></i>Recent Activity</h4>
+                </div>
+                <div class="card-body">
+                    {% if submissions %}
+                        <div class="row">
+                            {% for submission in submissions|slice:":5" %}
+                                <div class="col-lg-6 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ submission.assignment.title }}</h6>
+                                            <div class="mb-2">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-calendar me-1"></i>Submitted: {{ submission.submitted_at|date:"M d, Y H:i" }}
+                                                </small>
+                                            </div>
+                                            <div class="mb-2">
+                                                <span class="badge bg-{% if submission.status == 'graded' %}success{% elif submission.status == 'submitted' %}info{% else %}warning{% endif %}">
+                                                    {{ submission.status|title }}
+                                                </span>
+                                            </div>
+                                            {% if submission.feedback %}
+                                                <p class="mb-0"><strong>Feedback:</strong> {{ submission.feedback }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No recent activity</h5>
+                            <p class="text-muted">Your assignment submissions and activity will appear here.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{% url 'student_dashboard' %}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

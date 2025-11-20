@@ -1,0 +1,148 @@
+{% extends 'academic/base.html' %}
+{% block title %}Course Management{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Course Management</li>
+                </ol>
+            </nav>
+            <h1 class="display-6 fw-bold text-white mb-3">
+                <i class="fas fa-book me-2"></i>Course Management
+            </h1>
+        </div>
+    </div>
+
+    <!-- Create Course Form -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Create New Course</h4>
+                    <button class="btn btn-light btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#createCourseForm" aria-expanded="false">
+                        <i class="fas fa-plus me-1"></i>Add Course
+                    </button>
+                </div>
+                <div class="collapse" id="createCourseForm">
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="create_course" value="1">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="course_code" class="form-label fw-bold">Course Code *</label>
+                                        <input type="text" class="form-control" id="course_code" name="course_code" required placeholder="e.g., CS101">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="course_name" class="form-label fw-bold">Course Name *</label>
+                                        <input type="text" class="form-control" id="course_name" name="course_name" required placeholder="e.g., Introduction to Computer Science">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="teacher" class="form-label fw-bold">Assigned Teacher *</label>
+                                        <select class="form-select" id="teacher" name="teacher" required>
+                                            <option value="">Select Teacher</option>
+                                            {% for teacher in teachers %}
+                                                <option value="{{ teacher.id }}">{{ teacher.user.get_full_name|default:teacher.user.username }} ({{ teacher.employee_id }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-plus-circle me-1"></i>Create Course
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#createCourseForm">
+                                    <i class="fas fa-times me-1"></i>Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Courses List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-list me-2"></i>All Courses</h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Course Code</th>
+                                    <th>Course Name</th>
+                                    <th>Teacher</th>
+                                    <th>Assignments</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for course in courses %}
+                                    <tr>
+                                        <td><strong>{{ course.course_code }}</strong></td>
+                                        <td>{{ course.course_name }}</td>
+                                        <td>
+                                            {{ course.assigned_teacher.user.get_full_name|default:course.assigned_teacher.user.username }}
+                                            <br><small class="text-muted">{{ course.assigned_teacher.employee_id }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ course.assignment_set.count }}</span>
+                                        </td>
+                                        <td>
+                                            <form method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this course? This will also delete all related assignments and results.')">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="delete_course" value="1">
+                                                <input type="hidden" name="course_id" value="{{ course.id }}">
+                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                    <i class="fas fa-trash me-1"></i>Delete
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if not courses %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No courses found</h5>
+                            <p class="text-muted">Create your first course using the form above.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,191 @@
+{% extends 'academic/base.html' %}
+{% block title %}Manage Course: {{ course.name }}{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'teacher_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Manage Course</li>
+                </ol>
+            </nav>
+            <h1 class="display-6 fw-bold text-white mb-3">
+                <i class="fas fa-book me-2"></i>Manage Course: {{ course.name }}
+            </h1>
+            <p class="text-white-50 mb-0">Course Code: {{ course.code }} | Credits: {{ course.credits }}</p>
+        </div>
+    </div>
+
+    <!-- Course Overview -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>Course Overview</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5 class="card-title">{{ course.name }}</h5>
+                            <p class="card-text">{{ course.description|default:"No description available." }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="p-2">
+                                        <h4 class="text-primary">{{ course.code }}</h4>
+                                        <small class="text-muted">Course Code</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="p-2">
+                                        <h4 class="text-success">{{ course.credits }}</h4>
+                                        <small class="text-muted">Credits</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Material Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-edit me-2"></i>Update Course Material</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="update_material" value="1">
+                        <div class="mb-3">
+                            <label for="materialTextarea" class="form-label fw-bold">Course Material</label>
+                            <textarea name="material" class="form-control" id="materialTextarea" rows="6" placeholder="Enter course material content...">{{ course.material }}</textarea>
+                            <div class="form-text">Provide detailed course material and learning resources.</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Update Material
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Management Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-file-upload me-2"></i>File Management</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Upload New File -->
+                    <div class="mb-4">
+                        <h5 class="mb-3"><i class="fas fa-cloud-upload-alt me-2"></i>Upload New File</h5>
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <input type="hidden" name="upload_file" value="1">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <input type="file" name="file" class="form-control" id="fileInput" required>
+                                    <div class="form-text">Supported formats: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, etc.</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="fas fa-upload me-2"></i>Upload File
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <hr>
+
+                    <!-- Uploaded Files -->
+                    <div>
+                        <h5 class="mb-3"><i class="fas fa-folder-open me-2"></i>Uploaded Files</h5>
+                        {% if files %}
+                            <div class="row">
+                                {% for file in files %}
+                                <div class="col-lg-6 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="fas fa-file fa-2x text-primary me-3"></i>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="card-title mb-1">{{ file.file.name|truncatechars:30 }}</h6>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-calendar me-1"></i>Uploaded: {{ file.uploaded_at|date:"M d, Y H:i" }}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <a href="{{ file.file.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                    <i class="fas fa-eye me-1"></i>View
+                                                </a>
+                                                <a href="{{ file.file.url }}" download class="btn btn-outline-secondary btn-sm">
+                                                    <i class="fas fa-download me-1"></i>Download
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No files uploaded yet</h5>
+                                <p class="text-muted">Upload course materials, assignments, or resources using the form above.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Syllabus Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h4 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Update Syllabus</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="update_syllabus" value="1">
+                        <div class="mb-3">
+                            <label for="syllabusTextarea" class="form-label fw-bold">Course Syllabus</label>
+                            <textarea name="syllabus" class="form-control" id="syllabusTextarea" rows="8" placeholder="Enter course syllabus...">{{ course.syllabus }}</textarea>
+                            <div class="form-text">Outline the course structure, topics, and learning objectives.</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save me-2"></i>Update Syllabus
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 text-center">
+            <a href="{% url 'teacher_dashboard' %}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

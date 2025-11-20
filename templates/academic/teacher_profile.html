@@ -1,0 +1,216 @@
+{% extends 'academic/base.html' %}
+{% block title %}My Profile{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'teacher_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Profile</li>
+                </ol>
+            </nav>
+            <h1 class="display-6 fw-bold text-white mb-3">My Profile</h1>
+        </div>
+    </div>
+
+    <!-- Profile Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-user-circle fa-4x text-primary"></i>
+                    </div>
+                    <h2 class="card-title">{{ teacher.user.get_full_name|default:teacher.user.username }}</h2>
+                    <p class="text-muted mb-2">Teacher</p>
+                    <span class="badge bg-primary fs-6">ID: {{ teacher.employee_id }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Information -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>Profile Information</h4>
+                    <button class="btn btn-light btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#editProfile" aria-expanded="false" aria-controls="editProfile">
+                        <i class="fas fa-edit me-1"></i>Edit Profile
+                    </button>
+                </div>
+                <div class="card-body">
+                    <!-- View Mode -->
+                    <div id="viewProfile">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Full Name</label>
+                                    <p class="form-control-plaintext">{{ teacher.user.get_full_name|default:"Not provided" }}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Username</label>
+                                    <p class="form-control-plaintext">{{ teacher.user.username }}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Email</label>
+                                    <p class="form-control-plaintext">{{ teacher.user.email|default:"Not provided" }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Employee ID</label>
+                                    <p class="form-control-plaintext">{{ teacher.employee_id }}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Department</label>
+                                    <p class="form-control-plaintext">{{ teacher.department|default:"Not specified" }}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Joining Date</label>
+                                    <p class="form-control-plaintext">{{ teacher.joining_date|date:"M d, Y"|default:"Not specified" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit Mode -->
+                    <div class="collapse" id="editProfile">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="first_name" class="form-label fw-bold">First Name</label>
+                                        <input type="text" class="form-control" id="first_name" name="first_name" value="{{ teacher.user.first_name }}" maxlength="30">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="last_name" class="form-label fw-bold">Last Name</label>
+                                        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ teacher.user.last_name }}" maxlength="30">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label fw-bold">Email</label>
+                                        <input type="email" class="form-control" id="email" name="email" value="{{ teacher.user.email }}" maxlength="254">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Employee ID</label>
+                                        <input type="text" class="form-control" value="{{ teacher.employee_id }}" readonly>
+                                        <small class="text-muted">Employee ID cannot be changed</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="department" class="form-label fw-bold">Department</label>
+                                        <input type="text" class="form-control" id="department" name="department" value="{{ teacher.department }}" maxlength="100">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Joining Date</label>
+                                        <input type="text" class="form-control" value="{{ teacher.joining_date|date:'M d, Y'|default:'Not specified' }}" readonly>
+                                        <small class="text-muted">Joining date cannot be changed</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save me-1"></i>Save Changes
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#editProfile">
+                                    <i class="fas fa-times me-1"></i>Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Statistics</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="p-2">
+                                <h3 class="text-primary">{{ courses|length }}</h3>
+                                <p class="text-muted mb-0 small">Courses</p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="p-2">
+                                <h3 class="text-success">{{ total_students }}</h3>
+                                <p class="text-muted mb-0 small">Students</p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="p-2">
+                                <h3 class="text-info">{{ total_assignments }}</h3>
+                                <p class="text-muted mb-0 small">Assignments</p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="p-2">
+                                <h3 class="text-warning">{{ total_submissions }}</h3>
+                                <p class="text-muted mb-0 small">Submissions</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assigned Courses -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-book me-2"></i>Assigned Courses</h4>
+                </div>
+                <div class="card-body">
+                    {% if courses %}
+                        <div class="row">
+                            {% for course in courses %}
+                                <div class="col-lg-6 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ course.name }}</h5>
+                                            <p class="card-text">{{ course.description|truncatechars:100 }}</p>
+                                            <div class="row text-center">
+                                                <div class="col-6">
+                                                    <small class="text-muted">Code</small>
+                                                    <br><strong>{{ course.code }}</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    <small class="text-muted">Credits</small>
+                                                    <br><strong>{{ course.credits }}</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No courses assigned</h5>
+                            <p class="text-muted">You don't have any courses assigned yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{% url 'teacher_dashboard' %}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

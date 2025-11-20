@@ -1,0 +1,198 @@
+{% extends 'academic/base.html' %}
+{% block title %}My Assignments{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'student_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Assignments</li>
+                </ol>
+            </nav>
+            <h1 class="display-6 fw-bold text-white mb-3">My Assignments</h1>
+        </div>
+    </div>
+
+    <!-- Assignment Status Overview -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="text-success mb-2">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                    <h3 class="text-success">{{ submissions|length }}</h3>
+                    <p class="text-muted mb-0">Submitted</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="text-warning mb-2">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                    <h3 class="text-warning">{{ pending_count }}</h3>
+                    <p class="text-muted mb-0">Pending</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="text-info mb-2">
+                        <i class="fas fa-tasks fa-2x"></i>
+                    </div>
+                    <h3 class="text-info">{{ assignments|length }}</h3>
+                    <p class="text-muted mb-0">Total</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Assignments -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Available Assignments</h4>
+                </div>
+                <div class="card-body">
+                    {% if assignments %}
+                        <div class="row">
+                            {% for assignment in assignments %}
+                                <div class="col-lg-6 mb-4">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ assignment.title }}</h5>
+                                            <p class="card-text">{{ assignment.description }}</p>
+                                            <div class="mb-3">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-calendar me-1"></i>Due: {{ assignment.due_date|date:"M d, Y" }}
+                                                </small>
+                                            </div>
+                                            {% if assignment.file %}
+                                                <a href="{{ assignment.file.url }}" class="btn btn-outline-primary btn-sm me-2">
+                                                    <i class="fas fa-download me-1"></i>Download
+                                                </a>
+                                            {% endif %}
+                                            {% if not assignment.submissions %}
+                                                <button class="btn btn-primary btn-sm" onclick="submitAssignment({{ assignment.id }})">
+                                                    <i class="fas fa-upload me-1"></i>Submit
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">No assignments available</h4>
+                            <p class="text-muted">Check back later for new assignments.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Your Submissions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-file-upload me-2"></i>Your Submissions</h4>
+                </div>
+                <div class="card-body">
+                    {% if submissions %}
+                        <div class="row">
+                            {% for sub in submissions %}
+                                <div class="col-lg-6 mb-4">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ sub.assignment.title }}</h5>
+                                            <div class="mb-2">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-clock me-1"></i>Submitted: {{ sub.submitted_at|date:"M d, Y H:i" }}
+                                                </small>
+                                            </div>
+                                            <div class="mb-2">
+                                                <span class="badge bg-{% if sub.status == 'graded' %}success{% elif sub.status == 'submitted' %}info{% else %}warning{% endif %}">
+                                                    {{ sub.status|title }}
+                                                </span>
+                                            </div>
+                                            {% if sub.feedback %}
+                                                <div class="alert alert-info">
+                                                    <strong>Feedback:</strong> {{ sub.feedback }}
+                                                </div>
+                                            {% endif %}
+                                            {% if sub.file %}
+                                                <a href="{{ sub.file.url }}" class="btn btn-outline-secondary btn-sm">
+                                                    <i class="fas fa-eye me-1"></i>View Submission
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-file-upload fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">No submissions yet</h4>
+                            <p class="text-muted">Submit your first assignment to get started.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{% url 'student_dashboard' %}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Submit Assignment Modal -->
+<div class="modal fade" id="submitModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Submit Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="submitForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="submissionFile" class="form-label">Upload File</label>
+                        <input type="file" class="form-control" id="submissionFile" name="file" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="submissionNotes" class="form-label">Notes (Optional)</label>
+                        <textarea class="form-control" id="submissionNotes" name="notes" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function submitAssignment(assignmentId) {
+    document.getElementById('submitForm').action = `/academic/submit-assignment/${assignmentId}/`;
+    new bootstrap.Modal(document.getElementById('submitModal')).show();
+}
+</script>
+{% endblock %}

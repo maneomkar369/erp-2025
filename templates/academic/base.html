@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Academic Portal{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e9ecef;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: #495057 !important;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px 16px;
+            transition: border-color 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .table thead th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 15px;
+        }
+        .table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        .badge {
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            color: #2d3748;
+        }
+        .container {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            border-bottom: none;
+        }
+        .stats-card {
+            text-align: center;
+            padding: 2rem;
+        }
+        .stats-card i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+        .stats-card h3 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #2d3748;
+        }
+        .breadcrumb {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .breadcrumb-item a {
+            color: #495057;
+            text-decoration: none;
+        }
+        .breadcrumb-item a:hover {
+            color: #667eea;
+            text-decoration: underline;
+        }
+        .breadcrumb-item.active {
+            color: #6c757d;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">Academic Portal</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        {% if user.role == 'Teacher' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'teacher_dashboard' %}">
+                                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'teacher_profile' %}">
+                                    <i class="fas fa-user me-1"></i>Profile
+                                </a>
+                            </li>
+                        {% elif user.role == 'Student' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'student_dashboard' %}">
+                                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'student_profile' %}">
+                                    <i class="fas fa-user me-1"></i>Profile
+                                </a>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout' %}">
+                                <i class="fas fa-sign-out-alt me-1"></i>Logout
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container mt-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-info">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                const table = document.getElementById('studentTable');
+                const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+                searchInput.addEventListener('keyup', function() {
+                    const filter = searchInput.value.toLowerCase();
+                    for (let i = 0; i < rows.length; i++) {
+                        const cells = rows[i].getElementsByTagName('td');
+                        let match = false;
+                        for (let j = 0; j < cells.length - 1; j++) {
+                            if (cells[j].textContent.toLowerCase().includes(filter)) {
+                                match = true;
+                                break;
+                            }
+                        }
+                        rows[i].style.display = match ? '' : 'none';
+                    }
+                });
+            }
+
+            // Filter by class
+            const classFilter = document.getElementById('classFilter');
+            if (classFilter) {
+                classFilter.addEventListener('change', function() {
+                    const filter = classFilter.value;
+                    const table = document.getElementById('studentTable');
+                    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+                    for (let i = 0; i < rows.length; i++) {
+                        const classCell = rows[i].getElementsByTagName('td')[2];
+                        rows[i].style.display = (filter === '' || classCell.textContent === filter) ? '' : 'none';
+                    }
+                });
+            }
+
+            // Auto calculate grade
+            const marksInputs = document.querySelectorAll('.marks-input');
+            marksInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    const row = this.closest('tr');
+                    const cai = parseFloat(row.querySelector('[data-exam="cai"]').value) || 0;
+                    const mse = parseFloat(row.querySelector('[data-exam="mse"]').value) || 0;
+                    const caii = parseFloat(row.querySelector('[data-exam="caii"]').value) || 0;
+                    const marks = [cai, mse, caii].filter(m => m > 0);
+                    if (marks.length > 0) {
+                        const avg = marks.reduce((a, b) => a + b, 0) / marks.length;
+                        let grade = 'F';
+                        if (avg >= 90) grade = 'A';
+                        else if (avg >= 80) grade = 'B';
+                        else if (avg >= 70) grade = 'C';
+                        else if (avg >= 60) grade = 'D';
+                        row.querySelector('.grade-cell').textContent = grade;
+                    }
+                });
+            });
+
+            // Save button
+            const saveBtns = document.querySelectorAll('.save-btn');
+            saveBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const studentId = row.dataset.studentId;
+                    const caiMarks = row.querySelector('[data-exam="cai"]').value;
+                    const caiDate = row.querySelector('[data-exam="cai"]').nextElementSibling.value;
+                    const mseMarks = row.querySelector('[data-exam="mse"]').value;
+                    const mseDate = row.querySelector('[data-exam="mse"]').nextElementSibling.value;
+                    const caiiMarks = row.querySelector('[data-exam="caii"]').value;
+                    const caiiDate = row.querySelector('[data-exam="caii"]').nextElementSibling.value;
+                    alert(`Saved for student ${studentId}: CA-I ${caiMarks} (${caiDate}), MSE ${mseMarks} (${mseDate}), CA-II ${caiiMarks} (${caiiDate})`);
+                    // TODO: Implement AJAX save
+                });
+            });
+
+            // View Profile
+            const viewBtns = document.querySelectorAll('.view-btn');
+            viewBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const studentId = this.dataset.studentId;
+                    alert(`View profile for student ${studentId}`);
+                    // TODO: Redirect to profile page
+                });
+            });
+
+            // Save Attendance
+            const saveAttBtns = document.querySelectorAll('.save-att-btn');
+            saveAttBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const studentId = row.dataset.studentId;
+                    const date = row.querySelector('.date-input').value;
+                    const status = row.querySelector('.status-select').value;
+                    alert(`Marked attendance for student ${studentId}: ${status} on ${date}`);
+                    // TODO: Implement AJAX save
+                });
+            });
+
+            // Generate Attendance Report
+            const generateReportBtn = document.getElementById('generateReport');
+            if (generateReportBtn) {
+                generateReportBtn.addEventListener('click', function() {
+                    const wb = XLSX.utils.book_new();
+                    const ws_data = [['Student', 'Course', 'Date', 'Status']];
+                    const rows = document.querySelectorAll('#historyTable tbody tr');
+                    for (let i = 0; i < rows.length; i++) {
+                        const cells = rows[i].getElementsByTagName('td');
+                        ws_data.push([cells[0].textContent, cells[1].textContent, cells[2].textContent, cells[3].textContent]);
+                    }
+                    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+                    XLSX.utils.book_append_sheet(wb, ws, 'Attendance Report');
+                    XLSX.writeFile(wb, 'attendance_report.xlsx');
+                });
+            }
+
+            // Export to Excel
+            const exportBtn = document.getElementById('exportBtn');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', function() {
+                    const table = document.getElementById('studentTable');
+                    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+                    const wb = XLSX.utils.book_new();
+                    const ws_data = [['Student ID', 'Name', 'Class', 'Subject', 'CA-I Marks', 'CA-I Date', 'MSE Marks', 'MSE Date', 'CA-II Marks', 'CA-II Date', 'Grade']];
+                    for (let i = 0; i < rows.length; i++) {
+                        if (rows[i].style.display !== 'none') {
+                            const cells = rows[i].getElementsByTagName('td');
+                            const inputs = rows[i].querySelectorAll('input');
+                            const rowData = [
+                                cells[0].textContent,
+                                cells[1].textContent,
+                                cells[2].textContent,
+                                cells[3].textContent,
+                                inputs[0].value,
+                                inputs[1].value,
+                                inputs[2].value,
+                                inputs[3].value,
+                                inputs[4].value,
+                                inputs[5].value,
+                                cells[10].textContent
+                            ];
+                            ws_data.push(rowData);
+                        }
+                    }
+                    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+                    XLSX.utils.book_append_sheet(wb, ws, 'Students');
+                    XLSX.writeFile(wb, 'students_results.xlsx');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

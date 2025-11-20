@@ -1,0 +1,221 @@
+{% extends 'academic/base.html' %}
+{% block title %}Assignments Management{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'teacher_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Assignments</li>
+                </ol>
+            </nav>
+            <h1 class="display-6 fw-bold text-white mb-3">Assignments Management</h1>
+        </div>
+    </div>
+
+    <!-- Create New Assignment -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Create New Assignment</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Course</label>
+                                    <select name="course" class="form-select" required>
+                                        <option value="">Select Course</option>
+                                        {% for course in courses %}
+                                        <option value="{{ course.id }}">{{ course.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Title</label>
+                                    <input type="text" name="title" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Description</label>
+                                    <textarea name="description" class="form-control" rows="3"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Due Date</label>
+                                    <input type="date" name="due_date" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Assignment File (Optional)</label>
+                                    <input type="file" name="file" class="form-control">
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" name="create_assignment" class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>Create Assignment
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Existing Assignments -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="mb-0"><i class="fas fa-tasks me-2"></i>Existing Assignments</h4>
+                </div>
+                <div class="card-body">
+                    {% if assignments %}
+                        {% for assignment in assignments %}
+                        <div class="assignment-item mb-4 p-4 border rounded">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h5 class="mb-2">{{ assignment.title }}</h5>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-6">
+                                            <small class="text-muted">
+                                                <i class="fas fa-book me-1"></i>Course: {{ assignment.course.name }}
+                                            </small>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar me-1"></i>Due: {{ assignment.due_date|date:"M d, Y" }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    {% if assignment.description %}
+                                    <p class="mb-2">{{ assignment.description }}</p>
+                                    {% endif %}
+                                    {% if assignment.file %}
+                                    <a href="{{ assignment.file.url }}" class="btn btn-outline-primary btn-sm me-2">
+                                        <i class="fas fa-download me-1"></i>Download Assignment
+                                    </a>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <button class="btn btn-info btn-sm toggle-submissions mb-2" data-assignment="{{ assignment.id }}">
+                                        <i class="fas fa-eye me-1"></i>View Submissions ({{ assignment.submissions.count }})
+                                    </button>
+                                    <div class="mt-2">
+                                        <span class="badge bg-{% if assignment.due_date < now %}danger{% elif assignment.due_date < now|date:'+7 days' %}warning{% else %}success{% endif %}">
+                                            {% if assignment.due_date < now %}Overdue{% elif assignment.due_date < now|date:'+7 days' %}Due Soon{% else %}Active{% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="submissions-container mt-3" id="submissions-{{ assignment.id }}" style="display: none;">
+                                {% if assignment.submissions.exists %}
+                                    {% for submission in assignment.submissions.all %}
+                                    <div class="submission-item p-3 mb-3 border-start border-3 border-primary bg-light rounded">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6 class="mb-2">{{ submission.student.user.get_full_name }} ({{ submission.student.roll_no }})</h6>
+                                                <div class="mb-2">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-clock me-1"></i>Submitted: {{ submission.submitted_at|date:"M d, Y H:i" }}
+                                                    </small>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <span class="badge bg-{% if submission.status == 'graded' %}success{% elif submission.status == 'submitted' %}info{% else %}warning{% endif %}">
+                                                        {{ submission.status|title }}
+                                                    </span>
+                                                </div>
+                                                {% if submission.file %}
+                                                <a href="{{ submission.file.url }}" class="btn btn-outline-secondary btn-sm">
+                                                    <i class="fas fa-download me-1"></i>Download Submission
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-md-6">
+                                                <form method="post">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="submission_id" value="{{ submission.id }}">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Grade</label>
+                                                        <input type="number" name="grade" class="form-control" min="0" max="100" value="{{ submission.grade }}" placeholder="Enter grade (0-100)">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Feedback</label>
+                                                        <textarea name="feedback" class="form-control" rows="2" placeholder="Provide feedback">{{ submission.feedback }}</textarea>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Status</label>
+                                                        <select name="status" class="form-select">
+                                                            <option value="pending" {% if submission.status == 'pending' %}selected{% endif %}>Pending</option>
+                                                            <option value="submitted" {% if submission.status == 'submitted' %}selected{% endif %}>Submitted</option>
+                                                            <option value="graded" {% if submission.status == 'graded' %}selected{% endif %}>Graded</option>
+                                                        </select>
+                                                    </div>
+                                                    <button type="submit" name="grade_submission" class="btn btn-success btn-sm">
+                                                        <i class="fas fa-save me-1"></i>Update Grade
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-center py-3">
+                                        <i class="fas fa-inbox fa-2x text-muted mb-2"></i>
+                                        <p class="text-muted mb-0">No submissions yet.</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">No assignments created yet</h4>
+                            <p class="text-muted">Create your first assignment using the form above.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{% url 'teacher_dashboard' %}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle submissions visibility
+    document.querySelectorAll('.toggle-submissions').forEach(button => {
+        button.addEventListener('click', function() {
+            const assignmentId = this.getAttribute('data-assignment');
+            const container = document.getElementById('submissions-' + assignmentId);
+            const icon = this.querySelector('i');
+            const textSpan = this.querySelector('span') || document.createElement('span');
+
+            if (container.style.display === 'none') {
+                container.style.display = 'block';
+                icon.className = 'fas fa-eye-slash me-1';
+                this.innerHTML = '<i class="fas fa-eye-slash me-1"></i>Hide Submissions (' + this.textContent.match(/\d+/)[0] + ')';
+            } else {
+                container.style.display = 'none';
+                icon.className = 'fas fa-eye me-1';
+                this.innerHTML = '<i class="fas fa-eye me-1"></i>View Submissions (' + this.textContent.match(/\d+/)[0] + ')';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

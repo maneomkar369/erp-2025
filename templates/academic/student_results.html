@@ -1,0 +1,153 @@
+{% extends 'academic/base.html' %}
+{% block title %}View Results{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'student_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Results</li>
+                </ol>
+            </nav>
+            <h1 class="display-6 fw-bold text-white mb-3">Exam Results</h1>
+        </div>
+    </div>
+
+    <!-- Internal Exam Results -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-file-alt me-2"></i>Internal Exam Results</h4>
+                </div>
+                <div class="card-body">
+                    {% if internal_results %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th><i class="fas fa-book me-2"></i>Course</th>
+                                    <th><i class="fas fa-tag me-2"></i>Exam Type</th>
+                                    <th><i class="fas fa-star me-2"></i>Marks</th>
+                                    <th><i class="fas fa-calendar me-2"></i>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in internal_results %}
+                                <tr>
+                                    <td><strong>{{ result.course.course_name }}</strong></td>
+                                    <td><span class="badge bg-primary">{{ result.exam_type }}</span></td>
+                                    <td><strong class="text-success">{{ result.marks }}</strong></td>
+                                    <td>{{ result.date|date:"M d, Y" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No internal exam results available</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Exam Results -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-trophy me-2"></i>Final Exam Results</h4>
+                </div>
+                <div class="card-body">
+                    {% if final_results %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th><i class="fas fa-book me-2"></i>Course</th>
+                                    <th><i class="fas fa-tag me-2"></i>Exam Type</th>
+                                    <th><i class="fas fa-star me-2"></i>Marks</th>
+                                    <th><i class="fas fa-calendar me-2"></i>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in final_results %}
+                                <tr>
+                                    <td><strong>{{ result.course.course_name }}</strong></td>
+                                    <td><span class="badge bg-success">{{ result.exam_type }}</span></td>
+                                    <td><strong class="text-success">{{ result.marks }}</strong></td>
+                                    <td>{{ result.date|date:"M d, Y" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-trophy fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No final exam results available</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Mark Sheet -->
+    {% if internal_results or final_results %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Download Mark Sheet</h5>
+                    <p class="card-text text-muted">Get a comprehensive PDF report of all your results</p>
+                    <button id="downloadMarks" class="btn btn-primary btn-lg">
+                        <i class="fas fa-download me-2"></i>Download Mark Sheet
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-12 text-center">
+            <a href="{% url 'student_dashboard' %}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Download Mark Sheet
+    document.getElementById('downloadMarks').addEventListener('click', function() {
+        const wb = XLSX.utils.book_new();
+        // Internal Results
+        const internalData = [['Course', 'Exam Type', 'Marks', 'Date']];
+        {% for result in internal_results %}
+        internalData.push(['{{ result.course.course_name }}', '{{ result.exam_type }}', {{ result.marks }}, '{{ result.date }}']);
+        {% endfor %}
+        const internalWs = XLSX.utils.aoa_to_sheet(internalData);
+        XLSX.utils.book_append_sheet(wb, internalWs, 'Internal Results');
+
+        // Final Results
+        const finalData = [['Course', 'Exam Type', 'Marks', 'Date']];
+        {% for result in final_results %}
+        finalData.push(['{{ result.course.course_name }}', '{{ result.exam_type }}', {{ result.marks }}, '{{ result.date }}']);
+        {% endfor %}
+        const finalWs = XLSX.utils.aoa_to_sheet(finalData);
+        XLSX.utils.book_append_sheet(wb, finalWs, 'Final Results');
+
+        XLSX.writeFile(wb, 'mark_sheet.xlsx');
+    });
+});
+</script>
+{% endblock %}

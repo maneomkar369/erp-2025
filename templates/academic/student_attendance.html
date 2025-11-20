@@ -1,0 +1,219 @@
+{% extends 'academic/base.html' %}
+{% block title %}Attendance Records{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'student_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Attendance</li>
+                </ol>
+            </nav>
+            <h1 class="display-6 fw-bold text-white mb-3">Attendance Records</h1>
+        </div>
+    </div>
+
+    <!-- Attendance Overview -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Attendance Overview</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="text-center mb-4">
+                                <h2 class="text-primary display-4 fw-bold">{{ att_perc|floatformat:1 }}%</h2>
+                                <p class="text-muted mb-0">Overall Attendance</p>
+                                <div class="progress mt-2" style="height: 10px;">
+                                    <div class="progress-bar bg-primary" role="progressbar" style="width: {{ att_perc }}%" aria-valuenow="{{ att_perc }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <canvas id="attendanceChart" width="250" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Monthly Summary</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyChart" width="200" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Statistics -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Attendance Statistics</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="p-3">
+                                <h3 class="text-success">{{ present_count }}</h3>
+                                <p class="text-muted mb-0">Present</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3">
+                                <h3 class="text-danger">{{ absent_count }}</h3>
+                                <p class="text-muted mb-0">Absent</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3">
+                                <h3 class="text-warning">{{ total_classes }}</h3>
+                                <p class="text-muted mb-0">Total Classes</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3">
+                                <h3 class="text-info">{{ att_perc|floatformat:1 }}%</h3>
+                                <p class="text-muted mb-0">Percentage</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance History -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="mb-0"><i class="fas fa-history me-2"></i>Attendance History</h4>
+                </div>
+                <div class="card-body">
+                    {% if attendance %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Course</th>
+                                        <th>Status</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for att in attendance %}
+                                    <tr>
+                                        <td>{{ att.date|date:"M d, Y" }}</td>
+                                        <td>{{ att.course.name }}</td>
+                                        <td>
+                                            <span class="badge bg-{% if att.status == 'Present' %}success{% else %}danger{% endif %}">
+                                                <i class="fas fa-{% if att.status == 'Present' %}check-circle{% else %}times-circle{% endif %} me-1"></i>
+                                                {{ att.status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if att.time %}
+                                                {{ att.time|time:"H:i" }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">No attendance records found</h4>
+                            <p class="text-muted">Your attendance records will appear here once classes begin.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{% url 'student_dashboard' %}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Attendance Pie Chart
+    const attCtx = document.getElementById('attendanceChart').getContext('2d');
+    const attendanceChart = new Chart(attCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Present', 'Absent'],
+            datasets: [{
+                data: [{{ att_perc }}, 100 - {{ att_perc }}],
+                backgroundColor: ['#28a745', '#dc3545'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            },
+            cutout: '60%'
+        }
+    });
+
+    // Monthly Attendance Bar Chart (Demo data)
+    const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+    const monthlyChart = new Chart(monthlyCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Present Days',
+                data: [25, 28, 26, 30, 27, 29],
+                backgroundColor: '#007bff',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        display: false
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
